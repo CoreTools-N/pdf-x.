@@ -1,0 +1,597 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF-X | 2026 Full Edition</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root { --red: #e5322d; --dark: #2c2c34; --bg: #f3f0ec; --blue: #007bff; --green: #28a745; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: #333; }
+        
+        .header { background: white; padding: 15px 5%; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { color: var(--red); font-size: 1.8rem; font-weight: 800; text-decoration: none; }
+        
+        .main-layout { display: flex; justify-content: center; padding: 20px; gap: 20px; }
+        .ad-sidebar { width: 160px; height: 600px; background: #ddd; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px; color: #666; border: 1px solid #ccc; flex-shrink: 0; position: sticky; top: 80px; }
+        
+        .ws-container { max-width: 1100px; margin: 20px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center; position: relative; flex: 1; min-height: 85vh; }
+        
+        .tool-header-wrapper { display: flex; justify-content: flex-start; margin-bottom: 15px; }
+        .tool-title-styled { color: var(--red); font-weight: 800; font-size: 1.5rem; border-left: 5px solid var(--red); padding-left: 15px; }
+
+        .help-guide { background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 14px; color: #856404; line-height: 1.6; }
+
+        .uploader-box { border: 2px dashed #bbb; padding: 60px; border-radius: 10px; cursor: pointer; background: #fafafa; transition: 0.3s; margin-bottom: 20px; }
+        .uploader-box:hover { border-color: var(--red); background: #fff1f0; }
+
+        #global-view { display: none; margin-bottom: 30px; }
+        .global-card { background: white; border: 2px solid #eee; padding: 20px; border-radius: 12px; width: 220px; position: relative; display: inline-block; }
+        .master-del-btn { position: absolute; top: -15px; right: -15px; background: var(--red); color: white; border: 3px solid white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; }
+
+        /* TOUR BOX - ABOVE LEFT CENTER OF PREVIEW */
+        #tour-box { display: none; background: #f0f0f0; border: 1px solid #ccc; padding: 12px; border-radius: 8px; margin: 10px auto 10px 20px; width: fit-content; font-size: 13px; font-weight: 600; color: #444; text-align: left; }
+
+        #preview-area { display: none; overflow-x: auto; gap: 0; padding: 50px 20px; align-items: center; background: #eee; border-radius: 10px; text-align: left; position: relative; }
+        .preview-item { background: #fff; border: 1px solid #ccc; padding: 5px; border-radius: 4px; flex: 0 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.15); width: 140px; height: 200px; display: flex; flex-direction: column; justify-content: center; margin: 0 10px; position: relative; }
+        .preview-item img { width: 100%; height: 170px; object-fit: contain; pointer-events: none; }
+        .preview-item small { display: block; margin-top: 5px; font-weight: bold; color: #666; text-align: center; }
+        
+        .remove-btn { position: absolute; top: -12px; right: -12px; background: var(--red); color: white; border: 2px solid white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 50; }
+
+        #slider-panel { display: none; margin-top: 20px; align-items: center; gap: 10px; justify-content: center; background: #f9f9f9; padding: 10px; border-radius: 8px; }
+        #zoom-slider { accent-color: var(--red); cursor: pointer; width: 200px; }
+
+        #result-area { display: none; margin-top: 30px; border-top: 2px solid #eee; padding-top: 30px; }
+        .download-card { background: white; border: 1px solid #ddd; padding: 25px; border-radius: 12px; display: inline-block; width: 280px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); position: relative; }
+        .download-card img { width: 100%; height: 350px; object-fit: contain; background: #f9f9f9; border-radius: 5px; border: 1px solid #eee; }
+        
+        .page-badge-on-img { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--dark); color: white; padding: 2px 15px; border-radius: 10px; font-size: 12px; font-weight: bold; border: 2px solid white; }
+
+        .filename-input { border: 2px solid #ddd; padding: 12px; border-radius: 8px; width: 320px; font-size: 1rem; font-weight: bold; margin: 20px auto; display: block; outline: none; }
+        .btn-action { background: var(--red); color: white; border: none; padding: 18px 50px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 30px; display: none; width: 100%; }
+        .btn-download { background: var(--green); color: white; border: none; padding: 15px; border-radius: 5px; cursor: pointer; width: 320px; font-weight: bold; font-size: 1.1rem; margin-top: 10px; }
+
+        .loading-screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); flex-direction: column; align-items: center; justify-content: center; border-radius: 15px; z-index: 1000; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--red); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="#" class="logo" onclick="location.reload()">PDF<span>-X</span></a>
+        <span>Pro Suite 2026</span>
+    </div>
+
+    <div class="main-layout">
+        <div class="ad-sidebar">Sponsored Ad</div>
+        
+        <div class="ws-container">
+            <div id="status-overlay" class="loading-screen">
+                <div class="spinner"></div>
+                <h3 id="status-text">Uploading File...</h3>
+            </div>
+
+            <div class="tool-header-wrapper">
+                <div class="tool-title-styled">PDF & Image Converter</div>
+            </div>
+
+            <div id="help-box" class="help-guide">
+                <strong>Quick Tips:</strong><br>
+                <span>• Change PNG/JPG to PDF, or convert PDF to Images (JPG/PNG).</span><br>
+                <span>• Arrange the order by dragging and holding the images.</span>
+            </div>
+
+            <div id="editor-step">
+                <div id="drop-zone" class="uploader-box" onclick="document.getElementById('file-input').click()">
+                    <h3>+ Add or Drag Images Here</h3>
+                    <input type="file" id="file-input" accept="image/*,application/pdf" multiple hidden onchange="handleFiles(this.files)">
+                </div>
+
+                <div id="global-view">
+                    <div class="global-card">
+                        <button class="master-del-btn" onclick="location.reload()">X</button>
+                        <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" width="50"><br>
+                        <small id="global-filename"></small>
+                    </div>
+                </div>
+
+                <div id="tour-box">
+                    ⓘ You can reorder this by holding and dragging the images below.
+                </div>
+
+                <div id="preview-area"></div>
+                
+                <div id="slider-panel">
+                    <strong>Adjust Size:</strong>
+                    <input type="range" id="zoom-slider" min="100" max="300" value="140" oninput="resizeThumbs(this.value)">
+                </div>
+                
+                <button id="action-btn" class="btn-action" onclick="toResultPage()">PROCEED & DOWNLOAD</button>
+            </div>
+
+            <div id="result-area">
+                <h2 style="color: var(--green);">✔ Success! Your File is Ready.</h2>
+                <div class="download-card">
+                    <img id="final-cover" src="">
+                    <div class="page-badge-on-img" id="final-pg-count">0 Pages</div>
+                </div>
+                <input type="text" id="file-name" class="filename-input" placeholder="Enter File Name...">
+                <button class="btn-download" id="dl-btn" onclick="generateAndDownload()">DOWNLOAD NOW</button>
+            </div>
+        </div>
+
+        <div class="ad-sidebar">Sponsored Ad</div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        
+        let filesList = [];
+        let isPdfInput = false;
+        const previewArea = document.getElementById('preview-area');
+
+        new Sortable(previewArea, {
+            animation: 150,
+            onEnd: () => refreshPages()
+        });
+
+        async function handleFiles(files) {
+            if(!files.length) return;
+            showLoad("Analyzing Files...");
+            
+            for (let f of files) {
+                if (f.type === 'application/pdf') {
+                    isPdfInput = true;
+                    document.getElementById('drop-zone').style.display = 'none';
+                    document.getElementById('global-view').style.display = 'block';
+                    document.getElementById('global-filename').innerText = f.name;
+                    await processPdf(f);
+                } else {
+                    await processImg(f);
+                }
+            }
+
+            previewArea.style.display = 'flex';
+            document.getElementById('tour-box').style.display = 'block';
+            document.getElementById('slider-panel').style.display = 'flex';
+            document.getElementById('action-btn').style.display = 'block';
+            refreshPages();
+            setTimeout(hideLoad, 800);
+        }
+
+        async function processImg(f) {
+            const id = 'i_' + Math.random().toString(36).substr(2, 9);
+            const base64 = await new Promise(r => {
+                const reader = new FileReader();
+                reader.onload = e => r(e.target.result);
+                reader.readAsDataURL(f);
+            });
+            filesList.push({ id, base64 });
+            addThumb(id, base64);
+        }
+
+        async function processPdf(f) {
+            const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 1.0 });
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.height = viewport.height; canvas.width = viewport.width;
+                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                const id = 'p_' + Math.random().toString(36).substr(2, 9);
+                const base64 = canvas.toDataURL('image/jpeg');
+                filesList.push({ id, base64 });
+                addThumb(id, base64);
+            }
+        }
+
+        function addThumb(id, src) {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            div.dataset.id = id;
+            div.style.width = document.getElementById('zoom-slider').value + 'px';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeImg('${id}')">×</button>
+                <img src="${src}">
+                <small>Page 1</small>
+            `;
+            previewArea.appendChild(div);
+        }
+
+        function resizeThumbs(v) {
+            document.querySelectorAll('.preview-item').forEach(item => {
+                item.style.width = v + 'px';
+                item.style.height = (v * 1.42) + 'px';
+            });
+        }
+
+        function removeImg(id) {
+            filesList = filesList.filter(i => i.id !== id);
+            document.querySelector(`[data-id="${id}"]`).remove();
+            if(!filesList.length) location.reload();
+            refreshPages();
+        }
+
+        function refreshPages() {
+            const items = previewArea.querySelectorAll('.preview-item');
+            items.forEach((item, i) => item.querySelector('small').innerText = `Page ${i+1}`);
+        }
+
+        function toResultPage() {
+            showLoad("Preparing Result...");
+            const order = Array.from(previewArea.children).filter(c => c.dataset.id).map(c => c.dataset.id);
+            filesList.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+            
+            document.getElementById('final-cover').src = filesList[0].base64;
+            document.getElementById('final-pg-count').innerText = filesList.length + " Pages";
+            document.getElementById('editor-step').style.display = 'none';
+            document.getElementById('result-area').style.display = 'block';
+            document.getElementById('dl-btn').innerText = isPdfInput ? "DOWNLOAD ZIP (IMAGES)" : "DOWNLOAD PDF";
+            setTimeout(hideLoad, 800);
+        }
+
+        async function generateAndDownload() {
+            const name = document.getElementById('file-name').value || "export";
+            if (isPdfInput) {
+                showLoad("Zipping Images...");
+                const zip = new JSZip();
+                filesList.forEach((f, i) => zip.file(`page_${i+1}.jpg`, f.base64.split(',')[1], { base64: true }));
+                const content = await zip.generateAsync({ type: "blob" });
+                saveFile(content, name + ".zip");
+            } else {
+                showLoad("Creating PDF...");
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                for (let i = 0; i < filesList.length; i++) {
+                    if (i > 0) doc.addPage();
+                    const img = filesList[i].base64;
+                    const p = doc.getImageProperties(img);
+                    const w = doc.internal.pageSize.getWidth(), h = doc.internal.pageSize.getHeight();
+                    const ratio = p.width / p.height;
+                    let dw = w - 20, dh = dw / ratio;
+                    if (dh > h - 20) { dh = h - 20; dw = dh * ratio; }
+                    doc.addImage(img, 'JPEG', (w - dw) / 2, (h - dh) / 2, dw, dh);
+                }
+                doc.save(name + ".pdf");
+            }
+            showLoad("Downloading...");
+            setTimeout(hideLoad, 1000);
+        }
+
+        function saveFile(blob, filename) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+        }
+
+        function showLoad(t) { document.getElementById('status-text').innerText = t; document.getElementById('status-overlay').style.display = 'flex'; }
+        function hideLoad() { document.getElementById('status-overlay').style.display = 'none'; }
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF-X | 2026 Full Edition</title>
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root { --red: #e5322d; --dark: #2c2c34; --bg: #f3f0ec; --blue: #007bff; --green: #28a745; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: #333; }
+        
+        .header { background: white; padding: 15px 5%; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { color: var(--red); font-size: 1.8rem; font-weight: 800; text-decoration: none; }
+        
+        .main-layout { display: flex; justify-content: center; padding: 20px; gap: 20px; }
+        .ad-sidebar { width: 160px; height: 600px; background: #ddd; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px; color: #666; border: 1px solid #ccc; flex-shrink: 0; position: sticky; top: 80px; }
+        
+        .ws-container { max-width: 1100px; margin: 20px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center; position: relative; flex: 1; min-height: 85vh; }
+        
+        .tool-header-wrapper { display: flex; justify-content: flex-start; margin-bottom: 15px; }
+        .tool-title-styled { color: var(--red); font-weight: 800; font-size: 1.5rem; border-left: 5px solid var(--red); padding-left: 15px; }
+
+        .help-guide { background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 14px; color: #856404; line-height: 1.6; }
+
+        /* ADS STYLING */
+        .ad-banner-center { max-width: 970px; height: 90px; background: #eee; border: 1px solid #ccc; margin: 10px auto 20px auto; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #888; border-radius: 8px; overflow: hidden; }
+        .ad-bottom { width: 100%; max-width: 728px; height: 90px; background: #eee; border: 1px solid #ccc; margin: 20px auto; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #888; }
+
+        .uploader-box { border: 2px dashed #bbb; padding: 60px; border-radius: 10px; cursor: pointer; background: #fafafa; transition: 0.3s; margin-bottom: 20px; }
+        .uploader-box:hover { border-color: var(--red); background: #fff1f0; }
+
+        #global-view { display: none; margin-bottom: 30px; }
+        .global-card { background: white; border: 2px solid #eee; padding: 20px; border-radius: 12px; width: 220px; position: relative; display: inline-block; }
+        .master-del-btn { position: absolute; top: -15px; right: -15px; background: var(--red); color: white; border: 3px solid white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; }
+
+        #tour-box { display: none; background: #f0f0f0; border: 1px solid #ccc; padding: 12px; border-radius: 8px; margin: 10px auto 10px 20px; width: fit-content; font-size: 13px; font-weight: 600; color: #444; text-align: left; }
+
+        #preview-area { display: none; overflow-x: auto; gap: 0; padding: 50px 20px; align-items: center; background: #eee; border-radius: 10px; text-align: left; position: relative; }
+        .preview-item { background: #fff; border: 1px solid #ccc; padding: 5px; border-radius: 4px; flex: 0 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.15); width: 140px; height: 200px; display: flex; flex-direction: column; justify-content: center; margin: 0 10px; position: relative; }
+        .preview-item img { width: 100%; height: 170px; object-fit: contain; pointer-events: none; }
+        .preview-item small { display: block; margin-top: 5px; font-weight: bold; color: #666; text-align: center; }
+        
+        .remove-btn { position: absolute; top: -12px; right: -12px; background: var(--red); color: white; border: 2px solid white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 50; }
+
+        #slider-panel { display: none; margin-top: 20px; align-items: center; gap: 10px; justify-content: center; background: #f9f9f9; padding: 10px; border-radius: 8px; }
+        #zoom-slider { accent-color: var(--red); cursor: pointer; width: 200px; }
+
+        #result-area { display: none; margin-top: 30px; border-top: 2px solid #eee; padding-top: 30px; }
+        .download-card { background: white; border: 1px solid #ddd; padding: 25px; border-radius: 12px; display: inline-block; width: 280px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); position: relative; }
+        .download-card img { width: 100%; height: 350px; object-fit: contain; background: #f9f9f9; border-radius: 5px; border: 1px solid #eee; }
+        
+        .page-badge-on-img { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--dark); color: white; padding: 2px 15px; border-radius: 10px; font-size: 12px; font-weight: bold; border: 2px solid white; }
+
+        .filename-input { border: 2px solid #ddd; padding: 12px; border-radius: 8px; width: 100%; max-width: 320px; font-size: 1rem; font-weight: bold; margin: 20px auto; display: block; outline: none; box-sizing: border-box; }
+        .btn-action { background: var(--red); color: white; border: none; padding: 18px 50px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 30px; display: none; width: 100%; }
+        .btn-download { background: var(--green); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; width: 100%; max-width: 320px; font-weight: bold; font-size: 1.1rem; margin-top: 10px; }
+        .btn-secondary { background: #666; color: white; border: none; padding: 15px 30px; font-size: 1rem; border-radius: 8px; cursor: pointer; margin: 10px; display: inline-block; }
+
+        .loading-screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); flex-direction: column; align-items: center; justify-content: center; border-radius: 15px; z-index: 1000; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--red); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media screen and (max-width: 768px) {
+            .ad-sidebar, .ad-banner-center { display: none !important; }
+            .main-layout { padding: 10px; gap: 0; }
+            .ws-container { padding: 15px; width: 100%; }
+            .uploader-box { padding: 30px 10px; }
+            .download-card { width: 100%; box-sizing: border-box; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="#" class="logo" onclick="location.reload()">PDF<span>-X</span></a>
+        <span>Pro Suite 2026</span>
+    </div>
+
+    <div class="main-layout">
+        <div class="ad-sidebar">Sponsored Ad</div>
+        
+        <div class="ws-container">
+            <div id="status-overlay" class="loading-screen">
+                <div class="spinner"></div>
+                <h3 id="status-text">Processing...</h3>
+            </div>
+
+            <div class="tool-header-wrapper">
+                <div class="tool-title-styled">PDF & Image Converter</div>
+            </div>
+
+            <div class="ad-banner-center">
+                Responsive Banner Ad (970x90)
+            </div>
+
+            <div id="help-box" class="help-guide">
+                <strong>Quick Tips:</strong><br>
+                <span>• Change PNG/JPG to PDF, or convert PDF to Images (JPG/PNG).</span><br>
+                <span>• Arrange the order by dragging and holding the images.</span>
+            </div>
+
+            <div id="editor-step">
+                <div id="drop-zone" class="uploader-box" onclick="document.getElementById('file-input').click()">
+                    <h3>+ Add or Drag Images Here</h3>
+                    <input type="file" id="file-input" accept="image/*,application/pdf" multiple hidden onchange="handleFiles(this.files)">
+                </div>
+
+                <div id="global-view">
+                    <div class="global-card">
+                        <button class="master-del-btn" onclick="location.reload()">X</button>
+                        <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" width="50"><br>
+                        <small id="global-filename"></small>
+                    </div>
+                </div>
+
+                <div id="tour-box">
+                    ⓘ You can reorder this by holding and dragging the images below.
+                </div>
+
+                <div id="preview-area"></div>
+                
+                <div id="slider-panel">
+                    <strong>Adjust Size:</strong>
+                    <input type="range" id="zoom-slider" min="100" max="300" value="140" oninput="resizeThumbs(this.value)">
+                </div>
+                
+                <button id="action-btn" class="btn-action" onclick="toResultPage()">PROCEED & DOWNLOAD</button>
+            </div>
+
+            <div id="result-area">
+                <h2 style="color: var(--green);">✔ Success! Your File is Ready.</h2>
+                <div class="download-card">
+                    <img id="final-cover" src="">
+                    <div class="page-badge-on-img" id="final-pg-count">0 Pages</div>
+                </div>
+                <input type="text" id="file-name" class="filename-input" placeholder="Enter File Name...">
+                <button class="btn-download" id="dl-btn" onclick="generateAndDownload()">DOWNLOAD NOW</button>
+                
+                <div style="margin-top:20px;">
+                    <button class="btn-secondary" style="background:#007bff;" onclick="backToEdit()">Back to Re-arrange</button>
+                    <button class="btn-secondary" onclick="location.reload()">Start New Conversion</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ad-sidebar">Sponsored Ad</div>
+    </div>
+
+    <div class="ad-bottom">
+        Leaderboard Advertisement (728x90)
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        
+        let filesList = [];
+        let isPdfInput = false;
+        const previewArea = document.getElementById('preview-area');
+
+        new Sortable(previewArea, {
+            animation: 150,
+            onEnd: () => refreshPages()
+        });
+
+        async function handleFiles(files) {
+            if(!files.length) return;
+            showLoad("Analyzing Files...");
+            
+            for (let f of files) {
+                if (f.type === 'application/pdf') {
+                    isPdfInput = true;
+                    document.getElementById('drop-zone').style.display = 'none';
+                    document.getElementById('global-view').style.display = 'block';
+                    document.getElementById('global-filename').innerText = f.name;
+                    await processPdf(f);
+                } else {
+                    await processImg(f);
+                }
+            }
+
+            previewArea.style.display = 'flex';
+            document.getElementById('tour-box').style.display = 'block';
+            document.getElementById('slider-panel').style.display = 'flex';
+            document.getElementById('action-btn').style.display = 'block';
+            refreshPages();
+            setTimeout(hideLoad, 800);
+        }
+
+        async function processImg(f) {
+            const id = 'i_' + Math.random().toString(36).substr(2, 9);
+            const base64 = await new Promise(r => {
+                const reader = new FileReader();
+                reader.onload = e => r(e.target.result);
+                reader.readAsDataURL(f);
+            });
+            filesList.push({ id, base64 });
+            addThumb(id, base64);
+        }
+
+        async function processPdf(f) {
+            const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 1.0 });
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.height = viewport.height; canvas.width = viewport.width;
+                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                const id = 'p_' + Math.random().toString(36).substr(2, 9);
+                const base64 = canvas.toDataURL('image/jpeg');
+                filesList.push({ id, base64 });
+                addThumb(id, base64);
+            }
+        }
+
+        function addThumb(id, src) {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            div.dataset.id = id;
+            div.style.width = document.getElementById('zoom-slider').value + 'px';
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeImg('${id}')">×</button>
+                <img src="${src}">
+                <small>Page 1</small>
+            `;
+            previewArea.appendChild(div);
+        }
+
+        function resizeThumbs(v) {
+            document.querySelectorAll('.preview-item').forEach(item => {
+                item.style.width = v + 'px';
+                item.style.height = (v * 1.42) + 'px';
+            });
+        }
+
+        function removeImg(id) {
+            filesList = filesList.filter(i => i.id !== id);
+            const el = document.querySelector(`[data-id="${id}"]`);
+            if(el) el.remove();
+            if(!filesList.length) location.reload();
+            refreshPages();
+        }
+
+        function refreshPages() {
+            const items = previewArea.querySelectorAll('.preview-item');
+            items.forEach((item, i) => item.querySelector('small').innerText = `Page ${i+1}`);
+        }
+
+        function toResultPage() {
+            showLoad("Preparing Result...");
+            const order = Array.from(previewArea.children).filter(c => c.dataset.id).map(c => c.dataset.id);
+            filesList.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+            
+            document.getElementById('final-cover').src = filesList[0].base64;
+            document.getElementById('final-pg-count').innerText = filesList.length + " Pages";
+            document.getElementById('editor-step').style.display = 'none';
+            document.getElementById('result-area').style.display = 'block';
+            document.getElementById('dl-btn').innerText = isPdfInput ? "DOWNLOAD ZIP (IMAGES)" : "DOWNLOAD PDF";
+            setTimeout(hideLoad, 800);
+        }
+
+        function backToEdit() {
+            document.getElementById('result-area').style.display = 'none';
+            document.getElementById('editor-step').style.display = 'block';
+        }
+
+        async function generateAndDownload() {
+            const name = document.getElementById('file-name').value || "export";
+            if (isPdfInput) {
+                showLoad("Zipping Images...");
+                const zip = new JSZip();
+                filesList.forEach((f, i) => zip.file(`page_${i+1}.jpg`, f.base64.split(',')[1], { base64: true }));
+                const content = await zip.generateAsync({ type: "blob" });
+                saveFile(content, name + ".zip");
+            } else {
+                showLoad("Creating PDF...");
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                for (let i = 0; i < filesList.length; i++) {
+                    if (i > 0) doc.addPage();
+                    const img = filesList[i].base64;
+                    const p = doc.getImageProperties(img);
+                    const w = doc.internal.pageSize.getWidth(), h = doc.internal.pageSize.getHeight();
+                    const ratio = p.width / p.height;
+                    let dw = w - 20, dh = dw / ratio;
+                    if (dh > h - 20) { dh = h - 20; dw = dh * ratio; }
+                    doc.addImage(img, 'JPEG', (w - dw) / 2, (h - dh) / 2, dw, dh);
+                }
+                doc.save(name + ".pdf");
+            }
+            
+            setTimeout(() => {
+                showLoad("Download complete!");
+                setTimeout(hideLoad, 1200);
+            }, 1000);
+        }
+
+        function saveFile(blob, filename) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+        }
+
+        function showLoad(t) { document.getElementById('status-text').innerText = t; document.getElementById('status-overlay').style.display = 'flex'; }
+        function hideLoad() { document.getElementById('status-overlay').style.display = 'none'; }
+    </script>
+</body>
+</html>

@@ -1,0 +1,578 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge PDF | PDF-X 2026</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root { --red: #e5322d; --dark: #2c2c34; --bg: #f3f0ec; --green: #28a745; --blue: #007bff; --grey: #888; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: #333; }
+        
+        .header { background: white; padding: 15px 5%; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { color: var(--red); font-size: 1.8rem; font-weight: 800; text-decoration: none; }
+
+        /* FIXED SIDEBARS FOR BOTH PAGES */
+        .main-layout { display: flex; justify-content: center; padding: 20px; gap: 20px; position: relative; }
+        .ad-sidebar { width: 160px; height: 600px; background: #ddd; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px; color: #666; border: 1px solid #ccc; flex-shrink: 0; position: sticky; top: 80px; }
+        
+        .ws-container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center; flex: 1; min-height: 85vh; position: relative; }
+        .tool-title-styled { color: var(--red); font-weight: 800; font-size: 1.5rem; border-left: 5px solid var(--red); padding-left: 15px; text-align: left; margin-bottom: 20px; }
+
+        .help-guide { background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 14px; color: #856404; line-height: 1.6; }
+
+        #global-list { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; }
+        .global-card { background: white; border: 2px solid #eee; padding: 10px; border-radius: 12px; width: 150px; position: relative; font-size: 11px; }
+        .master-del-btn { position: absolute; top: -10px; right: -10px; background: var(--red); color: white; border: 2px solid white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 5; }
+
+        .uploader-box { border: 2px dashed #bbb; padding: 60px; border-radius: 10px; cursor: pointer; background: #fafafa; transition: 0.3s; margin-bottom: 20px; }
+        .uploader-box:hover, .uploader-box.dragover { border-color: var(--red); background: #fff1f0; }
+
+        #preview-area { display: flex; overflow-x: auto; gap: 0; padding: 40px 10px; background: #eee; border-radius: 10px; margin-top: 20px; align-items: center; min-height: 250px; }
+        
+        .preview-item { background: #fff; border: 3px solid #ccc; padding: 5px; border-radius: 6px; flex: 0 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.15); width: 140px; height: 200px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0 5px; }
+        .preview-item img { width: 100%; height: 75%; object-fit: contain; pointer-events: none; }
+        .page-info-bar { width: 100%; background: #f9f9f9; font-size: 10px; padding: 4px 0; border-top: 1px solid #eee; margin-top: 5px; font-weight: bold; color: #555; }
+
+        .insert-plus-box { width: 40px; height: 40px; border: 2px dashed var(--grey); background: #fdfdfd; color: var(--grey); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; border-radius: 6px; flex: 0 0 auto; margin: 0 5px; }
+        .insert-plus-box:hover { border-color: var(--red); color: var(--red); transform: scale(1.1); }
+
+        .page-del-btn { position: absolute; top: -10px; right: -10px; background: var(--red); color: white; border: 2px solid white; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-weight: bold; font-size: 12px; z-index: 10; }
+
+        .slider-wrap { margin-top: 25px; display: none; background: #f1f1f1; padding: 15px; border-radius: 30px; align-items: center; justify-content: center; gap: 20px; }
+        .slider-wrap input { width: 250px; cursor: pointer; accent-color: var(--red); }
+
+        /* RESULT SCREEN */
+        #result-area { display: none; margin-top: 30px; }
+        .download-card { background: white; border: 1px solid #ddd; padding: 20px; border-radius: 12px; display: inline-block; width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .btn-download { background: var(--green); color: white; border: none; padding: 12px 15px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; }
+
+        .btn-action { background: var(--red); color: white; border: none; padding: 18px 50px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 30px; display: none; }
+        
+        .loading-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.96); flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--red); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="#" class="logo" onclick="location.reload()">PDF<span>-X</span></a>
+        <span>Merge Pro v2.0</span>
+    </div>
+
+    <div class="main-layout">
+        <div class="ad-sidebar">Sidebar Ad</div>
+
+        <div class="ws-container">
+            <div id="status-overlay" class="loading-screen">
+                <div class="spinner"></div>
+                <h3 id="status-text">Processing...</h3>
+            </div>
+
+            <div id="workspace-view">
+                <div class="tool-title-styled">Merge PDF</div>
+                <div id="help-box" class="help-guide">
+                    <strong>Guide:</strong><br>
+                    <span>• Use the grey <strong>--- + ---</strong> boxes to insert files in the middle. Drag to reorder.</span><br>
+                    <span>• Same border color = same document. Page numbers are at the bottom.</span>
+                </div>
+
+                <div id="global-list"></div>
+
+                <div id="drop-zone" class="uploader-box" onclick="document.getElementById('main-input').click()">
+                    <h3>Click or Drag PDF Files to Begin</h3>
+                    <input type="file" id="main-input" accept="application/pdf" multiple hidden onchange="handleImport(this.files, null)">
+                </div>
+
+                <div id="preview-area"></div>
+
+                <div id="zoom-control" class="slider-wrap">
+                    <small>Zoom Out</small>
+                    <input type="range" min="100" max="400" value="140" oninput="resizeItems(this.value)">
+                    <small>Zoom In</small>
+                </div>
+                
+                <button id="action-btn" class="btn-action" onclick="runMerge()">MERGE & DOWNLOAD</button>
+            </div>
+
+            <div id="result-area">
+                <h2 style="color: var(--green);">Successfully Merged!</h2>
+                <div class="download-card">
+                    <img id="result-thumb" src="" style="width:100%; border: 1px solid #ddd; border-radius: 5px;">
+                    <br><br><strong>Final Merged PDF</strong><br>
+                    <small id="result-pages"></small> Pages Total<br>
+                    <button class="btn-download" onclick="finalizeDownload()">Download Merged File</button>
+                </div>
+                <br>
+                <button class="btn-action" onclick="location.reload()" style="background:#666; display:inline-block; margin-top:20px;">Merge More Files</button>
+            </div>
+        </div>
+
+        <div class="ad-sidebar">Sidebar Ad</div>
+    </div>
+
+    <input type="file" id="inject-input" accept="application/pdf" multiple hidden>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        
+        let fileMap = new Map(); 
+        let currentTarget = null;
+        let baseName = "";
+        const colors = ['#007bff', '#28a745', '#6f42c1', '#fd7e14', '#e83e8c', '#20c997', '#ffc107'];
+        let colorCounter = 0;
+
+        const previewArea = document.getElementById('preview-area');
+        const dropZone = document.getElementById('drop-zone');
+        const injectInput = document.getElementById('inject-input');
+
+        new Sortable(previewArea, { animation: 150, draggable: '.preview-item' });
+
+        // Drag and Drop
+        ['dragenter', 'dragover'].forEach(e => {
+            dropZone.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); dropZone.classList.add('dragover'); });
+        });
+        ['dragleave', 'drop'].forEach(e => {
+            dropZone.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); dropZone.classList.remove('dragover'); });
+        });
+        dropZone.addEventListener('drop', (e) => handleImport(e.dataTransfer.files, null));
+
+        injectInput.onchange = function() { if(this.files.length) handleImport(this.files, currentTarget); this.value = ''; };
+
+        async function handleImport(files, target) {
+            const fileArr = Array.from(files);
+            if(!fileArr.length) return;
+
+            document.getElementById('status-overlay').style.display = 'flex';
+            document.getElementById('status-text').innerText = "Analyzing PDF...";
+            dropZone.style.display = 'none';
+            document.getElementById('zoom-control').style.display = 'flex';
+
+            for (let file of fileArr) {
+                if(!baseName) baseName = file.name.replace(/\.[^/.]+$/, "");
+                
+                const id = 'f_' + Date.now() + Math.random();
+                const color = colors[colorCounter % colors.length];
+                colorCounter++;
+                fileMap.set(id, { file: file, color: color });
+
+                const gCard = document.createElement('div');
+                gCard.className = 'global-card';
+                gCard.id = 'g' + id;
+                gCard.style.border = `2px solid ${color}`;
+                gCard.innerHTML = `
+                    <button class="master-del-btn" onclick="removeEntireFile('${id}')">X</button>
+                    <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" width="30"><br>
+                    <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:bold; color:${color}">${file.name}</div>
+                `;
+                document.getElementById('global-list').appendChild(gCard);
+                
+                const pdf = await pdfjsLib.getDocument({data: await file.arrayBuffer()}).promise;
+                const frag = document.createDocumentFragment();
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({scale: 0.5});
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height; canvas.width = viewport.width;
+                    await page.render({canvasContext: context, viewport: viewport}).promise;
+                    
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.dataset.fid = id;
+                    div.dataset.pid = i - 1;
+                    div.style.borderColor = color;
+                    div.innerHTML = `<button class="page-del-btn" onclick="removeOnePage(this)">X</button><img src="${canvas.toDataURL()}"><div class="page-info-bar">Page ${i}</div>`;
+                    frag.appendChild(div);
+
+                    const plus = document.createElement('div');
+                    plus.className = 'insert-plus-box';
+                    plus.innerText = '+';
+                    plus.onclick = function() { currentTarget = this; injectInput.click(); };
+                    frag.appendChild(plus);
+                }
+
+                if (!target) {
+                    if (!previewArea.innerHTML) {
+                        const start = document.createElement('div');
+                        start.className = 'insert-plus-box';
+                        start.innerText = '+';
+                        start.onclick = function() { currentTarget = this; injectInput.click(); };
+                        previewArea.appendChild(start);
+                    }
+                    previewArea.appendChild(frag);
+                } else {
+                    target.after(frag);
+                }
+            }
+            document.getElementById('action-btn').style.display = 'inline-block';
+            document.getElementById('status-overlay').style.display = 'none';
+        }
+
+        function removeOnePage(btn) {
+            const item = btn.parentElement;
+            if(item.nextSibling && item.nextSibling.classList.contains('insert-plus-box')) item.nextSibling.remove();
+            item.remove();
+            if(!previewArea.querySelector('.preview-item')) location.reload();
+        }
+
+        function removeEntireFile(id) {
+            document.getElementById('g' + id).remove();
+            previewArea.querySelectorAll(`[data-fid="${id}"]`).forEach(el => {
+                if(el.nextSibling && el.nextSibling.classList.contains('insert-plus-box')) el.nextSibling.remove();
+                el.remove();
+            });
+            fileMap.delete(id);
+            if(!previewArea.querySelector('.preview-item')) location.reload();
+        }
+
+        function resizeItems(px) {
+            document.querySelectorAll('.preview-item').forEach(i => {
+                i.style.width = px + 'px'; i.style.height = (px * 1.42) + 'px';
+            });
+        }
+
+        async function runMerge() {
+            document.getElementById('status-overlay').style.display = 'flex';
+            document.getElementById('status-text').innerText = "Merging PDF Content...";
+            const merged = await PDFLib.PDFDocument.create();
+            const items = Array.from(previewArea.querySelectorAll('.preview-item'));
+            const cache = new Map();
+
+            for (let item of items) {
+                const fid = item.dataset.fid;
+                if(!cache.has(fid)) cache.set(fid, await PDFLib.PDFDocument.load(await fileMap.get(fid).file.arrayBuffer()));
+                const [copy] = await merged.copyPages(cache.get(fid), [parseInt(item.dataset.pid)]);
+                merged.addPage(copy);
+            }
+
+            const url = URL.createObjectURL(new Blob([await merged.save()], {type: "application/pdf"}));
+            document.getElementById('result-thumb').src = items[0].querySelector('img').src;
+            document.getElementById('result-pages').innerText = items.length;
+            window.finalBlob = url;
+            
+            document.getElementById('status-overlay').style.display = 'none';
+            document.getElementById('workspace-view').style.display = 'none';
+            document.getElementById('result-area').style.display = 'block';
+        }
+
+        function finalizeDownload() {
+            document.getElementById('status-overlay').style.display = 'flex';
+            document.getElementById('status-text').innerText = "Almost ready! Your file is being prepared...";
+            
+            const randomID = Math.floor(100 + Math.random() * 900);
+            const name = `${baseName}_merged_${randomID}.pdf`;
+
+            setTimeout(() => {
+                const a = document.createElement('a'); a.href = window.finalBlob; a.download = name; a.click();
+                document.getElementById('status-overlay').style.display = 'none';
+            }, 1800);
+        }
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge PDF | PDF-X 2026</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root { --red: #e5322d; --dark: #2c2c34; --bg: #f3f0ec; --green: #28a745; --blue: #007bff; --grey: #888; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: #333; }
+        
+        .header { background: white; padding: 15px 5%; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { color: var(--red); font-size: 1.8rem; font-weight: 800; text-decoration: none; }
+
+        .main-layout { display: flex; justify-content: center; padding: 20px; gap: 20px; position: relative; }
+        .ad-sidebar { width: 160px; height: 600px; background: #ddd; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px; color: #666; border: 1px solid #ccc; flex-shrink: 0; position: sticky; top: 80px; }
+        
+        .ws-container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center; flex: 1; min-height: 85vh; position: relative; }
+        .tool-title-styled { color: var(--red); font-weight: 800; font-size: 1.5rem; border-left: 5px solid var(--red); padding-left: 15px; text-align: left; margin-bottom: 20px; }
+
+        .help-guide { background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 14px; color: #856404; line-height: 1.6; }
+
+        #global-list { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; }
+        .global-card { background: white; border: 2px solid #eee; padding: 10px; border-radius: 12px; width: 150px; position: relative; font-size: 11px; }
+        .master-del-btn { position: absolute; top: -10px; right: -10px; background: var(--red); color: white; border: 2px solid white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 5; }
+
+        .uploader-box { border: 2px dashed #bbb; padding: 60px; border-radius: 10px; cursor: pointer; background: #fafafa; transition: 0.3s; margin-bottom: 20px; }
+        .uploader-box:hover, .uploader-box.dragover { border-color: var(--red); background: #fff1f0; }
+
+        #preview-area { display: flex; overflow-x: auto; gap: 0; padding: 40px 10px; background: #eee; border-radius: 10px; margin-top: 20px; align-items: center; min-height: 250px; }
+        
+        .preview-item { background: #fff; border: 3px solid #ccc; padding: 5px; border-radius: 6px; flex: 0 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.15); width: 140px; height: 200px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0 5px; }
+        .preview-item img { width: 100%; height: 75%; object-fit: contain; pointer-events: none; }
+        .page-info-bar { width: 100%; background: #f9f9f9; font-size: 10px; padding: 4px 0; border-top: 1px solid #eee; margin-top: 5px; font-weight: bold; color: #555; }
+
+        .insert-plus-box { width: 40px; height: 40px; border: 2px dashed var(--grey); background: #fdfdfd; color: var(--grey); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; border-radius: 6px; flex: 0 0 auto; margin: 0 5px; }
+        .insert-plus-box:hover { border-color: var(--red); color: var(--red); transform: scale(1.1); }
+
+        .page-del-btn { position: absolute; top: -10px; right: -10px; background: var(--red); color: white; border: 2px solid white; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-weight: bold; font-size: 12px; z-index: 10; }
+
+        .slider-wrap { margin-top: 25px; display: none; background: #f1f1f1; padding: 15px; border-radius: 30px; align-items: center; justify-content: center; gap: 20px; }
+        .slider-wrap input { width: 250px; cursor: pointer; accent-color: var(--red); }
+
+        #result-area { display: none; margin-top: 30px; }
+        .download-card { background: white; border: 1px solid #ddd; padding: 20px; border-radius: 12px; display: inline-block; width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .btn-download { background: var(--green); color: white; border: none; padding: 12px 15px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; }
+
+        .btn-action { background: var(--red); color: white; border: none; padding: 18px 50px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 30px; display: none; }
+        .btn-secondary { background: #666; color: white; border: none; padding: 15px 30px; font-size: 1rem; border-radius: 8px; cursor: pointer; margin: 10px; display: inline-block; }
+        
+        .loading-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.96); flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--red); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* MOBILE OPTIMIZATION */
+        @media screen and (max-width: 768px) {
+            .ad-sidebar { display: none !important; }
+            .main-layout { padding: 10px; gap: 0; }
+            .ws-container { padding: 15px; width: 100%; }
+            .uploader-box { padding: 30px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="#" class="logo" onclick="location.reload()">PDF<span>-X</span></a>
+        <span>Merge Pro v2.0</span>
+    </div>
+
+    <div class="main-layout">
+        <div class="ad-sidebar">Sidebar Ad</div>
+
+        <div class="ws-container">
+            <div id="status-overlay" class="loading-screen">
+                <div class="spinner"></div>
+                <h3 id="status-text">Processing...</h3>
+            </div>
+
+            <div id="workspace-view">
+                <div class="tool-title-styled">Merge PDF</div>
+                <div id="help-box" class="help-guide">
+                    <strong>Guide:</strong><br>
+                    <span>• Use the grey <strong>+</strong> boxes to insert files. Drag pages to reorder.</span><br>
+                    <span>• Same border color = same document. Click "X" to remove pages.</span>
+                </div>
+
+                <div id="global-list"></div>
+
+                <div id="drop-zone" class="uploader-box" onclick="document.getElementById('main-input').click()">
+                    <h3>Click or Drag PDF Files to Begin</h3>
+                    <input type="file" id="main-input" accept="application/pdf" multiple hidden onchange="handleImport(this.files, null)">
+                </div>
+
+                <div id="preview-area"></div>
+
+                <div id="zoom-control" class="slider-wrap">
+                    <small>Small</small>
+                    <input type="range" min="100" max="400" value="140" oninput="resizeItems(this.value)">
+                    <small>Large</small>
+                </div>
+                
+                <button id="action-btn" class="btn-action" onclick="runMerge()">MERGE & DOWNLOAD</button>
+            </div>
+
+            <div id="result-area">
+                <h2 style="color: var(--green);">Successfully Merged!</h2>
+                <div class="download-card">
+                    <img id="result-thumb" src="" style="width:100%; border: 1px solid #ddd; border-radius: 5px;">
+                    <br><br><strong>Final Merged PDF</strong><br>
+                    <small id="result-pages"></small> Pages Total<br>
+                    <button class="btn-download" onclick="finalizeDownload()">Download Merged File</button>
+                </div>
+                <br>
+                <div style="margin-top:20px;">
+                    <button class="btn-secondary" style="background:#007bff;" onclick="backToEdit()">Back to Re-arrange</button>
+                    <button class="btn-secondary" onclick="location.reload()">Merge More Files</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ad-sidebar">Sidebar Ad</div>
+    </div>
+
+    <input type="file" id="inject-input" accept="application/pdf" multiple hidden>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        
+        let fileMap = new Map(); 
+        let currentTarget = null;
+        let baseName = "";
+        const colors = ['#007bff', '#28a745', '#6f42c1', '#fd7e14', '#e83e8c', '#20c997', '#ffc107'];
+        let colorCounter = 0;
+
+        const previewArea = document.getElementById('preview-area');
+        const dropZone = document.getElementById('drop-zone');
+        const injectInput = document.getElementById('inject-input');
+
+        // Drag and Drop
+        ['dragenter', 'dragover'].forEach(e => {
+            dropZone.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); dropZone.classList.add('dragover'); });
+        });
+        ['dragleave', 'drop'].forEach(e => {
+            dropZone.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); dropZone.classList.remove('dragover'); });
+        });
+        dropZone.addEventListener('drop', (e) => handleImport(e.dataTransfer.files, null));
+
+        injectInput.onchange = function() { if(this.files.length) handleImport(this.files, currentTarget); this.value = ''; };
+
+        async function handleImport(files, target) {
+            const fileArr = Array.from(files);
+            if(!fileArr.length) return;
+
+            document.getElementById('status-overlay').style.display = 'flex';
+            document.getElementById('status-text').innerText = "Analyzing PDF...";
+            dropZone.style.display = 'none';
+            document.getElementById('zoom-control').style.display = 'flex';
+
+            for (let file of fileArr) {
+                if(!baseName) baseName = file.name.replace(/\.[^/.]+$/, "");
+                
+                const id = 'f_' + Date.now() + Math.random();
+                const color = colors[colorCounter % colors.length];
+                colorCounter++;
+                fileMap.set(id, { file: file, color: color });
+
+                const gCard = document.createElement('div');
+                gCard.className = 'global-card';
+                gCard.id = 'g' + id;
+                gCard.style.border = `2px solid ${color}`;
+                gCard.innerHTML = `
+                    <button class="master-del-btn" onclick="removeEntireFile('${id}')">X</button>
+                    <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" width="30"><br>
+                    <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:bold; color:${color}">${file.name}</div>
+                `;
+                document.getElementById('global-list').appendChild(gCard);
+                
+                const pdf = await pdfjsLib.getDocument({data: await file.arrayBuffer()}).promise;
+                const frag = document.createDocumentFragment();
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({scale: 0.5});
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height; canvas.width = viewport.width;
+                    await page.render({canvasContext: context, viewport: viewport}).promise;
+                    
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.dataset.fid = id;
+                    div.dataset.pid = i - 1;
+                    div.style.borderColor = color;
+                    div.innerHTML = `<button class="page-del-btn" onclick="removeOnePage(this)">X</button><img src="${canvas.toDataURL()}"><div class="page-info-bar">Page ${i}</div>`;
+                    frag.appendChild(div);
+
+                    const plus = document.createElement('div');
+                    plus.className = 'insert-plus-box';
+                    plus.innerText = '+';
+                    plus.onclick = function() { currentTarget = this; injectInput.click(); };
+                    frag.appendChild(plus);
+                }
+
+                if (!target) {
+                    if (!previewArea.innerHTML) {
+                        const start = document.createElement('div');
+                        start.className = 'insert-plus-box';
+                        start.innerText = '+';
+                        start.onclick = function() { currentTarget = this; injectInput.click(); };
+                        previewArea.appendChild(start);
+                    }
+                    previewArea.appendChild(frag);
+                } else {
+                    target.after(frag);
+                }
+            }
+            document.getElementById('action-btn').style.display = 'inline-block';
+            document.getElementById('status-overlay').style.display = 'none';
+            
+            // Re-initialize Sortable after fragments are added
+            new Sortable(previewArea, { animation: 150, draggable: '.preview-item' });
+        }
+
+        function removeOnePage(btn) {
+            const item = btn.parentElement;
+            if(item.nextSibling && item.nextSibling.classList.contains('insert-plus-box')) item.nextSibling.remove();
+            item.remove();
+            if(!previewArea.querySelector('.preview-item')) location.reload();
+        }
+
+        function removeEntireFile(id) {
+            document.getElementById('g' + id).remove();
+            previewArea.querySelectorAll(`[data-fid="${id}"]`).forEach(el => {
+                if(el.nextSibling && el.nextSibling.classList.contains('insert-plus-box')) el.nextSibling.remove();
+                el.remove();
+            });
+            fileMap.delete(id);
+            if(!previewArea.querySelector('.preview-item')) location.reload();
+        }
+
+        function resizeItems(px) {
+            document.querySelectorAll('.preview-item').forEach(i => {
+                i.style.width = px + 'px'; i.style.height = (px * 1.42) + 'px';
+            });
+        }
+
+        async function runMerge() {
+            document.getElementById('status-overlay').style.display = 'flex';
+            document.getElementById('status-text').innerText = "Merging PDF Content...";
+            const merged = await PDFLib.PDFDocument.create();
+            const items = Array.from(previewArea.querySelectorAll('.preview-item'));
+            const cache = new Map();
+
+            for (let item of items) {
+                const fid = item.dataset.fid;
+                if(!cache.has(fid)) cache.set(fid, await PDFLib.PDFDocument.load(await fileMap.get(fid).file.arrayBuffer()));
+                const [copy] = await merged.copyPages(cache.get(fid), [parseInt(item.dataset.pid)]);
+                merged.addPage(copy);
+            }
+
+            const url = URL.createObjectURL(new Blob([await merged.save()], {type: "application/pdf"}));
+            document.getElementById('result-thumb').src = items[0].querySelector('img').src;
+            document.getElementById('result-pages').innerText = items.length;
+            window.finalBlob = url;
+            
+            setTimeout(() => {
+                document.getElementById('status-overlay').style.display = 'none';
+                document.getElementById('workspace-view').style.display = 'none';
+                document.getElementById('result-area').style.display = 'block';
+            }, 800);
+        }
+
+        function backToEdit() {
+            document.getElementById('result-area').style.display = 'none';
+            document.getElementById('workspace-view').style.display = 'block';
+        }
+
+        function finalizeDownload() {
+            document.getElementById('status-overlay').style.display = 'flex';
+            document.getElementById('status-text').innerText = "Preparing your file...";
+            
+            const randomID = Math.floor(100 + Math.random() * 900);
+            const name = `${baseName}_merged_${randomID}.pdf`;
+
+            setTimeout(() => {
+                const a = document.createElement('a'); a.href = window.finalBlob; a.download = name; a.click();
+                document.getElementById('status-overlay').style.display = 'none';
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
